@@ -6,11 +6,17 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dtos';
+import { CreateUserDto, UpdateUserDto, UserDto } from './dtos';
 import { User } from '@prisma/client';
+import { JwtGuard } from '../../common/guards';
+import { Serialize } from '../../common/interceptors';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
+@UseGuards(JwtGuard)
+@Serialize(UserDto)
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
@@ -21,7 +27,8 @@ export class UsersController {
   }
 
   @Get()
-  findAll(): Promise<User[]> {
+  findAll(@CurrentUser() user: User): Promise<User[]> {
+    console.log(user);
     return this.usersService.findAll();
   }
 
